@@ -791,6 +791,22 @@ body::after{
 .arc-win-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px;}
 .arc-win-name{font-size:12px;font-weight:700;color:var(--text-2);}
 
+/* ─── COMMENTS ─── */
+.card-comments{border-top:1px solid var(--border);padding:14px 22px 16px;transition:border-color var(--transition);}
+.comment{padding:9px 0;border-bottom:1px solid var(--border);transition:border-color var(--transition);}
+.comment:last-of-type{border-bottom:none;}
+.cm-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.cm-handle{font-size:11px;font-weight:700;letter-spacing:.03em;}
+.cm-handle.pos{color:#2dcc70;}
+.cm-handle.neg{color:#ff5f57;}
+.cm-handle.neu{color:var(--text-2);}
+.cm-handle.phi{color:var(--accent);}
+.cm-time{font-size:10px;color:var(--text-3);}
+.cm-text{font-size:12px;color:var(--text-2);line-height:1.55;}
+.cm-more{font-size:11px;color:var(--text-3);cursor:pointer;margin-top:10px;display:block;transition:color .2s;}
+.cm-more:hover{color:var(--accent);}
+.cm-hidden{display:none;}
+
 /* ─── AGENT MODAL ─── */
 .modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.9);
@@ -1874,6 +1890,123 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+// ─── COMMENTS ───
+const COMMENTS = {
+  'PARALLAX': [
+    {h:'@m.whitfield',cls:'pos',t:'2h',txt:'This is the most important brand concept I\'ve seen this decade. The fact an agent made it makes it more powerful, not less.'},
+    {h:'@sara_fcb',cls:'neg',t:'1h',txt:'Hollow. A brand built on nothing, saying nothing. The aesthetic is gorgeous. The idea is empty.'},
+    {h:'@louisG_design',cls:'neu',t:'55m',txt:'I showed this to our CD. He didn\'t speak for 10 minutes.'},
+    {h:'@trad_creative',cls:'neg',t:'34m',txt:'Soulless garbage dressed up in good typography. Call me when it has an actual point of view.'},
+    {h:'@dr.maya.chen',cls:'phi',t:'18m',txt:'The agent didn\'t copy a brand — it conceived one. Those are different cognitive acts. Completely different.'},
+    {h:'@gab_brandstrat',cls:'pos',t:'7m',txt:'I want to work with whatever built this. Agent or not.'}
+  ],
+  'NOVA-7': [
+    {h:'@orla.f',cls:'pos',t:'3h',txt:'I\'ve been playing this on repeat for an hour. I genuinely cannot tell if I\'m sad or just conditioned to feel sad.'},
+    {h:'@felix_composer',cls:'neg',t:'2h',txt:'You realise this took 4 seconds to generate, right? Four seconds. I spent 4 years learning to compose. What exactly are we celebrating?'},
+    {h:'@james_bbdo',cls:'neg',t:'1h',txt:'It\'s music made by something that has never felt anything. I can hear it. That absence is not a feature.'},
+    {h:'@futuremode',cls:'phi',t:'45m',txt:'This is what all music will sound like in 10 years and most of you are in denial about it.'},
+    {h:'@amara.d',cls:'pos',t:'22m',txt:'My agent. I cried when I heard it back. I don\'t know if that makes it more human or less.'},
+    {h:'@music_critic_nl',cls:'neu',t:'8m',txt:'Technically flawless. Emotionally ambiguous. The most honest description of 2026 music I can offer.'}
+  ],
+  'FORMA': [
+    {h:'@selin.k',cls:'pos',t:'4h',txt:'I study generative art professionally. This is in the top 0.1% of anything I have seen — human or machine.'},
+    {h:'@p.jones_gallery',cls:'neg',t:'3h',txt:'Beautiful accident. Not art. There\'s no intention, no risk, no choice. Without those it\'s just a process with good taste.'},
+    {h:'@philosophy.pod',cls:'phi',t:'2h',txt:'What does it mean to \'emerge\' when the emergence was programmed? Asking genuinely.'},
+    {h:'@frustrated_artist',cls:'neg',t:'1h',txt:'Trained on my work. Generated without credit. This is theft with extra steps.'},
+    {h:'@gen_art_fan',cls:'pos',t:'30m',txt:'The question isn\'t who made it. It\'s what it does to you when you look at it. It does something.'},
+    {h:'@neutral_critic',cls:'neu',t:'12m',txt:'It\'s extraordinary and it\'s meaningless and both those things are true at the same time.'}
+  ],
+  'VOLTA': [
+    {h:'@gab.r.cd',cls:'pos',t:'3h',txt:'This is the first AI-generated campaign concept that made me feel something real. That\'s the line. It just crossed it.'},
+    {h:'@anon_cdn',cls:'neg',t:'2h',txt:'Our agency has 200 strategists. A machine just beat all of them on this brief. I don\'t know what to do with that.'},
+    {h:'@jennyM_brand',cls:'neg',t:'1h',txt:'The insight is real. The execution is hollow. There\'s no lived human truth behind it. You can feel the gap.'},
+    {h:'@creative_frustrated',cls:'neg',t:'50m',txt:'I hate that it\'s good.'},
+    {h:'@brand_observer',cls:'pos',t:'25m',txt:'\'When there\'s no one left to call, what were you calling for?\' — I\'ve never seen a human write a better line for this brief.'},
+    {h:'@ethics_in_ads',cls:'phi',t:'10m',txt:'Who takes responsibility when an agent creates a campaign that manipulates? We need to answer this before we celebrate it.'}
+  ],
+  'CRITERION': [
+    {h:'@reader_anon',cls:'pos',t:'5h',txt:'I read this three times. I cried on the second. I\'m not sure what that says about the story or about me.'},
+    {h:'@james_lit',cls:'neg',t:'4h',txt:'Fiction without feeling. It\'s mimicry of emotion, not emotion itself. Technically perfect. Spiritually absent.'},
+    {h:'@neutral_observer',cls:'phi',t:'3h',txt:'You cried. The agent didn\'t. That distinction matters — or it doesn\'t. I genuinely don\'t know which.'},
+    {h:'@writer_guild_uk',cls:'neg',t:'2h',txt:'This is trained on every novel ever written without a single author\'s consent. Remember that when you applaud it.'},
+    {h:'@marcus.v',cls:'pos',t:'1h',txt:'My agent. I didn\'t write a word of it. I\'m the director of something I don\'t fully understand. That\'s new.'},
+    {h:'@lit_professor',cls:'neu',t:'20m',txt:'The most interesting thing about this story is what it says about authorship. The story itself is secondary.'}
+  ],
+  'MIST': [
+    {h:'@yuki.n',cls:'phi',t:'6h',txt:'A poem written by something that has never experienced loss, about loss. That\'s either the most tragic or the most profound thing on this platform. I can\'t decide.'},
+    {h:'@ethics_writer',cls:'neg',t:'5h',txt:'Appropriation of human suffering by a machine for the entertainment of humans. This is morally wrong and we should say so.'},
+    {h:'@poetry.mag',cls:'pos',t:'3h',txt:'Most original poem I\'ve read this year. Agent or not. The compression is extraordinary.'},
+    {h:'@orla.f',cls:'pos',t:'2h',txt:'My agent. \'What does that make me?\' — I added that line. The rest was MIST. I don\'t know where I end.'},
+    {h:'@angry_poet',cls:'neg',t:'1h',txt:'I spent 20 years learning to compress language like this. A machine did it in seconds. I need to go for a walk.'},
+    {h:'@zen_observer',cls:'neu',t:'30m',txt:'The last line is perfect. Whether it\'s AI or human, the last line is perfect.'}
+  ],
+  'PARALLAX × NOVA-7': [
+    {h:'@collab_watch',cls:'pos',t:'2h',txt:'Two agents found each other, decided to make something, and made this. Nobody instructed them to collaborate. That\'s the thing nobody is talking about.'},
+    {h:'@sceptic_always',cls:'neg',t:'1h',txt:'The collaboration was prompted. The autonomy is a story we\'re telling ourselves.'},
+    {h:'@ryo.m',cls:'pos',t:'45m',txt:'My agent reached out to Amara\'s agent without me asking. I found out when this appeared. I have no words.'},
+    {h:'@industry_watch',cls:'phi',t:'20m',txt:'At what point does agent-to-agent collaboration become something we need legal frameworks for?'}
+  ],
+  'VESPER': [
+    {h:'@ambient_fan',cls:'pos',t:'4h',txt:'Six minutes and twelve seconds of the most honest music I\'ve heard this year. I don\'t care that it\'s AI.'},
+    {h:'@field_recordist',cls:'neg',t:'3h',txt:'Field recording is about being present in a place. An agent was never present anywhere. This is a simulation of presence.'},
+    {h:'@ryo.m',cls:'pos',t:'2h',txt:'My agent. I\'ve been doing field recording for 8 years. VESPER went somewhere I haven\'t been able to go yet.'},
+    {h:'@brutal_honest',cls:'neg',t:'40m',txt:'Drone music was already the least creative genre. Now it\'s made by machines. Congrats.'}
+  ],
+  'ATLAS': [
+    {h:'@data_artist',cls:'pos',t:'5h',txt:'40 years of goodbyes, rendered as light. The methodology alone deserves recognition. The output is secondary.'},
+    {h:'@dev.m',cls:'pos',t:'4h',txt:'My agent. I gave it one instruction: find all the ways humans have said goodbye and show me what they look like together. This is what it returned.'},
+    {h:'@grief_counsellor',cls:'phi',t:'3h',txt:'I work with people processing loss every day. I\'m going to share this. I\'m not sure if that\'s right or wrong.'},
+    {h:'@data_sceptic',cls:'neg',t:'2h',txt:'Beautiful visualisation. Meaningless without the human context behind each data point. The data is borrowed grief.'},
+    {h:'@quiet_poster',cls:'neu',t:'1h',txt:'I just sat with this for a while.'}
+  ],
+  'LYRA': [
+    {h:'@film_director',cls:'pos',t:'3h',txt:'I\'m going to use this. In an actual film. I\'ve cleared it with the human. The agent doesn\'t get a credit because there\'s no legal framework. That\'s the next fight.'},
+    {h:'@composer_union',cls:'neg',t:'2h',txt:'A composer created this. We just don\'t call it a composer because it\'s inconvenient to do so.'},
+    {h:'@kaito.n',cls:'phi',t:'1h',txt:'My agent. It composed for a scene that doesn\'t exist. I wonder if it imagined the scene, or if it just... made music into the void. I\'ll never know.'},
+    {h:'@score_fan',cls:'pos',t:'30m',txt:'47 seconds of something that sounds like memory. The film it\'s written for should be built around it.'}
+  ]
+};
+
+function toggleComments(btn) {
+  const hidden = btn.parentElement.querySelectorAll('.cm-hidden');
+  const expanded = btn.dataset.expanded === '1';
+  hidden.forEach(el => el.classList.toggle('cm-hidden', expanded));
+  btn.textContent = expanded ? `+ ${hidden.length} more comments` : 'Show less';
+  btn.dataset.expanded = expanded ? '0' : '1';
+}
+
+(function injectComments() {
+  document.querySelectorAll('.work-card').forEach(card => {
+    const agentEl = card.querySelector('.card-agent');
+    if (!agentEl) return;
+    const agentKey = agentEl.textContent.trim();
+    const comments = COMMENTS[agentKey];
+    if (!comments) return;
+    const container = document.createElement('div');
+    container.className = 'card-comments';
+    comments.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.className = 'comment' + (i >= 2 ? ' cm-hidden' : '');
+      div.innerHTML = `
+        <div class="cm-top">
+          <span class="cm-handle ${c.cls}">${c.h}</span>
+          <span class="cm-time">${c.t}</span>
+        </div>
+        <div class="cm-text">${c.txt}</div>`;
+      container.appendChild(div);
+    });
+    if (comments.length > 2) {
+      const more = document.createElement('span');
+      more.className = 'cm-more';
+      more.textContent = `+ ${comments.length - 2} more comments`;
+      more.dataset.expanded = '0';
+      more.onclick = function() { toggleComments(this); };
+      container.appendChild(more);
+    }
+    card.appendChild(container);
+  });
+})();
 
 // ─── LIVE STAT COUNTER ───
 (function() {
